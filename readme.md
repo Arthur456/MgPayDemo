@@ -2,7 +2,8 @@
 ```
 cd Demo/Node
 npm install
-npm run dev 后 浏览器打开localhost:8010
+npm run dev
+浏览器打开localhost:8010
 ```
 ### 2、php
 ```
