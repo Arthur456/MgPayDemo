@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>支付测试Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no, email=no" />
+    <link rel="stylesheet" href="./stylesheets/weui.min.css">
+    <link rel="stylesheet" href="./stylesheets/style.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="page">
+            <div class="page__hd">
+                <h1 class="page__title">支付测试Demo</h1>
+            </div>
+            <div class="page__bd">
+                <form id="form" class="weui-cells weui-cells_form" style="margin-top: 0">
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">商品信息</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" name="body" type="text" placeholder="请输入商品信息">
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">商品价格</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" name="amount" type="tel" placeholder="请输入商品价格">
+                        </div>
+                    </div>
+                </form>
+                <div class="weui-btn-area">
+                    <a class="weui-btn weui-btn_primary" href="javascript:" id="confirm">确定</a>
+                </div>
+            </div>
+
+            <div id="gallery" class="weui-gallery">
+                <span id="qrcode" class="weui-gallery__img"></span>
+                <div class="weui-gallery__opr">
+                    <a id="close" href="javascript:" class="weui-gallery__del">
+                        <i class="weui-icon-cancel weui-icon_gallery-cancel"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div id="dialog" class="js_dialog" style="display: none; position: relative; z-index: 1000;">
+                <div class="weui-mask"></div>
+                <div class="weui-dialog">
+                    <div id="content" class="weui-dialog__bd">弹窗内容，告知当前状态、信息和解决方法，描述文字尽量控制在三行内</div>
+                    <div class="weui-dialog__ft">
+                        <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loadingToast" style="display: none; position: relative; z-index: 1000;">
+                <div class="weui-mask_transparent"></div>
+                <div class="weui-toast">
+                    <i class="weui-loading weui-icon_toast"></i>
+                    <p class="weui-toast__content">数据加载中</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="./javascripts/zepto.min.js"></script>
+<script src="https://res.wx.qq.com/open/libs/weuijs/1.0.0/weui.min.js"></script>
+<script>
+    function showDialog(content) {
+        $('#dialog').fadeIn(200);
+        $('#content').text(content);
+    }
+    $('#confirm').on('click', function () {
+        var data = $('#form').serialize();
+        $.ajax({
+            url: '/qqHandler.php',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function (result) {
+                if (result.status && result.status == '900') {
+                    $('#gallery').fadeIn();
+                    $('#qrcode').css('background-image', 'url(http://pan.baidu.com/share/qrcode?w=480&h=480&url=' + encodeURIComponent(result.data.code_url) + ')');
+                } else if (result.info) {
+                    showDialog(result.info);
+                } else {
+                    showDialog('网络错误');
+                }
+            },
+            error: function (xhr, type) {
+                showDialog('网络错误');
+            },
+            beforeSend: function (xhr, settings) {
+                $('#loadingToast').fadeIn(200);
+            },
+            complete: function (xhr, status) {
+                $('#loadingToast').fadeOut(200);
+            }
+        })
+
+    });
+    $('#dialog').on('click', '.weui-dialog__btn', function () {
+        $(this).parents('.js_dialog').fadeOut(200);
+    });
+    $('#close').on('click', function () {
+        $('#gallery').fadeOut();
+    })
+</script>
+
+</html>
